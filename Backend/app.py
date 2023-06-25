@@ -31,8 +31,13 @@ def getText():
 @app.route('/api/text', methods=['POST'])
 def setText():
     text = request.get_json()['text']
-    remote_addr = request.remote_addr
+
+    forwarded_ips = request.headers.get('X-Forwarded-For', '').split(',')
+    remote_addr = forwarded_ips[0].strip() if forwarded_ips else request.remote_addr
+
     file_path = f'./text/{remote_addr}.txt'
+    if not os.path.exists('./text'):
+        os.makedirs('./text')
     with open(file_path, 'w+') as txt_file:
         txt_file.write(text)
     
@@ -51,7 +56,6 @@ def delete_file(file_path):
 
 
 if __name__ == "__main__":
-    if not os.path.exists('./text'):
-        os.makedirs('./text')
+    
 
     app.run(debug=True, host='0.0.0.0')
