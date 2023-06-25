@@ -12,12 +12,12 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/api/ip', methods=['GET'])
 def getIp():
-    remote_addr = request.remote_addr
+    remote_addr = request.headers.get('X-Forwarded-For', request.remote_addr)
     return jsonify({'ip': remote_addr})
 
 @app.route('/api/text', methods=['GET'])
 def getText():
-    remote_addr = request.remote_addr
+    remote_addr = request.headers.get('X-Forwarded-For', request.remote_addr)
     file_path = f'./text/{remote_addr}.txt'
     if os.path.exists(file_path):
         with open(file_path, 'r') as txt_file:
