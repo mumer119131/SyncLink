@@ -10,7 +10,10 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 
-
+@app.route('/api/ip', methods=['GET'])
+def getIp():
+    remote_addr = request.remote_addr
+    return jsonify({'ip': remote_addr})
 
 @app.route('/api/text', methods=['GET'])
 def getText():
@@ -37,7 +40,7 @@ def setText():
     return 'added text'
 
 def delete_file(file_path):
-    time.sleep(10)  # Delay for 30 minutes
+    time.sleep(60)  # Delay for 30 minutes
     try:
         os.remove(file_path)  # Delete the file
         print(f"File {file_path} deleted successfully.")
@@ -46,4 +49,7 @@ def delete_file(file_path):
 
 
 if __name__ == "__main__":
+    if not os.path.exists('./text'):
+        os.makedirs('./text')
+
     app.run(debug=True, host='0.0.0.0')

@@ -7,9 +7,10 @@ const Share = () => {
     const inputRef = useRef<HTMLInputElement | null>(null)
     const [text, setText] = useState<string>('')
     const [isCopied, setIsCopied] = useState<boolean>(false)
+    const baseUrl = 'https://synclink.onrender.com'
     const saveText = async () => {
         try{
-            const response = await fetch('http://localhost:5000/api/text', {
+            const response = await fetch(`${baseUrl}/api/text`, {
                 method: 'POST',
                 body: JSON.stringify({text: text}),
                 headers: {
@@ -29,7 +30,7 @@ const Share = () => {
     }
     const getText = async () => {
         try{
-            const response = await fetch('http://localhost:5000/api/text')
+            const response = await fetch(`${baseUrl}/api/text`)
             const data = await response.json()
             setText(data.text)
         }catch(err){
