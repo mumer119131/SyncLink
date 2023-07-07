@@ -3,6 +3,7 @@ from flask_cors import CORS
 import os
 import time
 import threading
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -55,7 +56,36 @@ def delete_file(file_path):
         print(f"Error deleting file: {e}")
 
 
-if __name__ == "__main__":
-    
+@app.route('/api/files', methods=['POST'])
+def uploadFiles():
+    # get files from the form data
+    file = request.files.get('file')
+    print(file)
+    # forwarded_ips = request.headers.get('X-Forwarded-For', '').split(',')
+    # remote_addr = forwarded_ips[0].strip() if forwarded_ips else request.remote_addr
+    remote_addr = request.remote_addr
+    print(remote_addr)
+    if not os.path.exists(f'./uploads/{remote_addr}'):
+        os.makedirs(f'./uploads/{remote_addr}')
 
+    file_path = os.path.join(f'./uploads/{remote_addr}', secure_filename(file.filename))
+    file.save(file_path)
+
+    return 'uploaded files'
+
+@app.route('/api/files', methods=['GET'])
+def getFiles():
+    # forwarded_ips = request.headers.get('X-Forwarded-For', '').split(',')
+    # remote_addr = forwarded_ips[0].strip() if forwarded_ips else request.remote_addr
+    remote_addr = request.remote_addr
+    print(remote_addr)
+    if not os.path.exists(f'./uploads/{remote_addr}'):
+        return jsonify({'files': []})
+    files = os.listdir(f'./uploads/{remote_addr}')
+    return jsonify({'files': files})
+
+if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
+
+
+
