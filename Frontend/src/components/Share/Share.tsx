@@ -144,7 +144,7 @@ const Share = () => {
                 </Tab.Panel>
                 <Tab.Panel className='w-full h-[30rem]'>
                     <div className='flex flex-col h-full'>
-                        <div className='flex flex-wrap gap-2 flex-grow'>
+                        <div className='flex flex-wrap gap-2 flex-grow overflow-auto mb-2'>
                             {
                                 files && Array.from(files).map((file, index)=> {
                                     return <div key={index} className='flex flex-col h-max gap-4 rounded-lg min-w-[10rem] max-w-[10rem] bg-gray-100 justify-between items-center px-4 py-2'>
@@ -156,7 +156,7 @@ const Share = () => {
                                 })
                             }
                         </div>
-                        <div className='flex flex-wrap gap-2 flex-grow'>
+                        <div className='flex flex-wrap gap-2 flex-grow overflow-auto'>
                             {
                                 selectedFiles && Array.from(selectedFiles).map((file, index)=> {
                                     return <div key={index} className='flex flex-col h-max gap-4 rounded-lg min-w-[10rem] max-w-[10rem] bg-gray-100 justify-between items-center px-4 py-2'>

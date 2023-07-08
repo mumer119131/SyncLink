@@ -61,9 +61,9 @@ def uploadFiles():
     # get files from the form data
     file = request.files.get('file')
     print(file)
-    # forwarded_ips = request.headers.get('X-Forwarded-For', '').split(',')
-    # remote_addr = forwarded_ips[0].strip() if forwarded_ips else request.remote_addr
-    remote_addr = request.remote_addr
+    forwarded_ips = request.headers.get('X-Forwarded-For', '').split(',')
+    remote_addr = forwarded_ips[0].strip() if forwarded_ips else request.remote_addr
+    # remote_addr = request.remote_addr
     print(remote_addr)
     if not os.path.exists(f'./uploads/{remote_addr}'):
         os.makedirs(f'./uploads/{remote_addr}')
@@ -71,13 +71,24 @@ def uploadFiles():
     file_path = os.path.join(f'./uploads/{remote_addr}', secure_filename(file.filename))
     file.save(file_path)
 
+    # delete file after 30 minutes
+    delete_thread = threading.Thread(target=delete_file_created, args=(file_path,))
+    delete_thread.start()
     return 'uploaded files'
+
+def delete_file_created(file_path):
+    time.sleep(60)  # Delay for 30 minutes
+    try:
+        os.remove(file_path)  # Delete the file
+        print(f"File {file_path} deleted successfully.")
+    except Exception as e:
+        print(f"Error deleting file: {e}")
 
 @app.route('/api/files', methods=['GET'])
 def getFiles():
-    # forwarded_ips = request.headers.get('X-Forwarded-For', '').split(',')
-    # remote_addr = forwarded_ips[0].strip() if forwarded_ips else request.remote_addr
-    remote_addr = request.remote_addr
+    forwarded_ips = request.headers.get('X-Forwarded-For', '').split(',')
+    remote_addr = forwarded_ips[0].strip() if forwarded_ips else request.remote_addr
+    # remote_addr = request.remote_addr
     print(remote_addr)
     if not os.path.exists(f'./uploads/{remote_addr}'):
         return jsonify({'files': []})
@@ -92,9 +103,9 @@ def getFiles():
 
 @app.route('/api/files/<filename>', methods=['GET'])
 def downloadFile(filename):
-    # forwarded_ips = request.headers.get('X-Forwarded-For', '').split(',')
-    # remote_addr = forwarded_ips[0].strip() if forwarded_ips else request.remote_addr
-    remote_addr = request.remote_addr
+    forwarded_ips = request.headers.get('X-Forwarded-For', '').split(',')
+    remote_addr = forwarded_ips[0].strip() if forwarded_ips else request.remote_addr
+    # remote_addr = request.remote_addr
     print(remote_addr)
     if not os.path.exists(f'./uploads/{remote_addr}'):
         return jsonify({'files': []})
