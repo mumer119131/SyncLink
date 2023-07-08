@@ -5,6 +5,7 @@ import {IoCopy} from 'react-icons/io5'
 import {Progress} from '@material-tailwind/react'
 import {AiFillFile} from 'react-icons/ai'
 import axios from 'axios'
+import {AiOutlineCloudDownload} from 'react-icons/ai'
 const Share = () => {
     const inputRef = useRef<HTMLInputElement | null>(null)
     const [text, setText] = useState<string>('')
@@ -65,14 +66,15 @@ const Share = () => {
         setIsCopied(true)
         setTimeout(()=> setIsCopied(false), 1000)
     }
-    const handleSelectedFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSelectedFile = async(e: React.ChangeEvent<HTMLInputElement>) => {
         if(!e.target.files) return;
         console.log(e.target.files)
         for(let i = 0; i < e.target.files.length; i++){
             const file = e.target.files[i]
-            uploadFile(file)
+            await uploadFile(file)
         }
         setSelectedFiles(e.target.files)
+        getFiles()
     }
     const uploadFile = async (file: File) => {
         try{
@@ -91,6 +93,27 @@ const Share = () => {
         }catch(err){
             console.log(err)
         }
+    }
+    const handleDownload = (filename : string) => {
+        axios
+          .get(`${baseUrl}/api/files/${filename}`, {
+            responseType: 'blob',
+            headers: {
+              'Content-Type': 'application/octet-stream',
+            },
+          })
+          .then(response => {
+            const blob = new Blob([response.data]);
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url);
+          })
+          .catch(error => {
+            console.error('Error downloading file:', error);
+          });
     }
   return (
     <div className="flex flex-col items-center justify-center">
@@ -119,11 +142,23 @@ const Share = () => {
                     <div className='flex flex-col h-full'>
                         <div className='flex flex-wrap gap-2 flex-grow'>
                             {
+                                files && Array.from(files).map((file, index)=> {
+                                    return <div key={index} className='flex flex-col h-max gap-4 rounded-lg min-w-[10rem] max-w-[10rem] bg-gray-100 justify-between items-center px-4 py-2'>
+                                        <AiFillFile className='text-5xl' />
+                                        <p className='w-full whitespace-nowrap text-sm overflow-hidden text-overflow-ellipsis'>{file.name}</p>
+                                        <AiOutlineCloudDownload className='cursor-pointer' onClick={()=> handleDownload(file.name)} />
+                                        <p>{Math.trunc(file.size / 1000).toLocaleString()} kb</p>
+                                    </div>
+                                })
+                            }
+                        </div>
+                        <div className='flex flex-wrap gap-2 flex-grow'>
+                            {
                                 selectedFiles && Array.from(selectedFiles).map((file, index)=> {
                                     return <div key={index} className='flex flex-col h-max gap-4 rounded-lg min-w-[10rem] max-w-[10rem] bg-gray-100 justify-between items-center px-4 py-2'>
                                         <AiFillFile className='text-5xl' />
                                         <p className='w-full whitespace-nowrap text-sm overflow-hidden text-overflow-ellipsis'>{file.name}</p>
-                                        <Progress value={uploadFileProgress}/>
+                                        <Progress value={uploadFileProgress} />
                                         <p>{Math.trunc(file.size / 1000).toLocaleString()} kb</p>
                                     </div>
                                 })

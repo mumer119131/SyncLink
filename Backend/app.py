@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 import time
@@ -81,8 +81,29 @@ def getFiles():
     print(remote_addr)
     if not os.path.exists(f'./uploads/{remote_addr}'):
         return jsonify({'files': []})
-    files = os.listdir(f'./uploads/{remote_addr}')
+    #send files size and name
+    files = []
+    for file in os.listdir(f'./uploads/{remote_addr}'):
+        files.append({
+            'name': file,
+            'size': os.path.getsize(f'./uploads/{remote_addr}/{file}')}),
     return jsonify({'files': files})
+
+
+@app.route('/api/files/<filename>', methods=['GET'])
+def downloadFile(filename):
+    # forwarded_ips = request.headers.get('X-Forwarded-For', '').split(',')
+    # remote_addr = forwarded_ips[0].strip() if forwarded_ips else request.remote_addr
+    remote_addr = request.remote_addr
+    print(remote_addr)
+    if not os.path.exists(f'./uploads/{remote_addr}'):
+        return jsonify({'files': []})
+    #send files size and name
+    files = []
+    for file in os.listdir(f'./uploads/{remote_addr}'):
+        if file == filename:
+            return send_from_directory(f'./uploads/{remote_addr}', filename)
+    return jsonify({'files': []})
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
