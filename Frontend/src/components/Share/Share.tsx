@@ -69,12 +69,16 @@ const Share = () => {
     const handleSelectedFile = async(e: React.ChangeEvent<HTMLInputElement>) => {
         if(!e.target.files) return;
         console.log(e.target.files)
+        setSelectedFiles(e.target.files)
         for(let i = 0; i < e.target.files.length; i++){
+            setUploadFileIndex(i)
             const file = e.target.files[i]
             await uploadFile(file)
         }
-        setSelectedFiles(e.target.files)
+        setUploadFileIndex(0)
+        setSelectedFiles(null)
         getFiles()
+        
     }
     const uploadFile = async (file: File) => {
         try{
@@ -158,7 +162,7 @@ const Share = () => {
                                     return <div key={index} className='flex flex-col h-max gap-4 rounded-lg min-w-[10rem] max-w-[10rem] bg-gray-100 justify-between items-center px-4 py-2'>
                                         <AiFillFile className='text-5xl' />
                                         <p className='w-full whitespace-nowrap text-sm overflow-hidden text-overflow-ellipsis'>{file.name}</p>
-                                        <Progress value={uploadFileProgress} />
+                                        <Progress value={index == uploadFileIndex ? uploadFileProgress : (uploadFileIndex > index ? 100 : 0)} />
                                         <p>{Math.trunc(file.size / 1000).toLocaleString()} kb</p>
                                     </div>
                                 })
